@@ -2,16 +2,16 @@
 //   1. Serves the front end (everything in /public) at http://localhost:3000
 //   2. Exposes the JSON API under /api/...
 
-import './env.js'; // must be first: loads .env before the database is chosen
+import './server/env.js'; // must be first: loads .env before the database is chosen
 import path from 'node:path';
 import express from 'express';
-import store from './db/index.js';
-import entrantsRouter from './routes/entrants.js';
-import hobbiesRouter from './routes/hobbies.js';
-import timeRouter from './routes/time.js';
+import store from './server/db/index.js';
+import entrantsRouter from './server/routes/entrants.js';
+import hobbiesRouter from './server/routes/hobbies.js';
+import timeRouter from './server/routes/time.js';
 
 const PORT = process.env.PORT ?? 3000;
-const PUBLIC_DIR = path.join(import.meta.dirname, '..', 'public');
+const PUBLIC_DIR = path.join(import.meta.dirname, 'public');
 
 const app = express();
 

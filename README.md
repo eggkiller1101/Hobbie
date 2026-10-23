@@ -30,8 +30,8 @@ hobbie-time-tracker/
 ├── data/                   ← the SQLite file is created here when Supabase isn't set up (git-ignored)
 ├── supabase/
 │   └── migrations/         ← SQL that creates the tables and view in Supabase (run in order)
+├── server.js               ← entry point: starts Express; auto-detected by Vercel
 ├── server/                 ← BACK END (runs in Node.js)
-│   ├── server.js           ← entry point: starts Express, serves /public, mounts /api routes
 │   ├── env.js              ← loads .env (imported first)
 │   ├── validation.js       ← shared input checks (names, ids, dates) and HttpError
 │   ├── db/
@@ -192,7 +192,7 @@ Supabase's Advisors may show an info notice *"RLS Enabled No Policy"*. That's ex
 
 | Command         | What it does                                                                 |
 |-----------------|------------------------------------------------------------------------------|
-| `npm run dev`   | Starts the server and **restarts it automatically** when you save a file in `server/`. Use this while developing. (Changes to `.env` need a manual restart.) |
+| `npm run dev`   | Starts the server and **restarts it automatically** when you save `server.js` or an imported file in `server/`. Use this while developing. (Changes to `.env` need a manual restart.) |
 | `npm start`     | Starts the server once, with no auto-restart.                                |
 
 Changes to files in `public/` (HTML, CSS, JS) don't need a restart. Just refresh the browser.
@@ -344,5 +344,11 @@ Data does **not** move between SQLite and Supabase automatically: each keeps its
 - [ ] More hobby animations
 
 - [ ] Deploy to Vercel with Supabase for persistent storage
+
+The root `server.js` is the Express entry point for Vercel. Vercel serves
+`public/` through its CDN; locally, Express serves the same files. Before
+deploying, configure `SUPABASE_URL` and `SUPABASE_SECRET_KEY` in the Vercel
+project environment variables and run the database migrations. The local
+SQLite fallback is for local development, not persistent storage on Vercel.
 
 **Out of scope:** payments.
