@@ -71,8 +71,8 @@ The routes never know which database they're using: both stores offer the same f
 ### 2. Get the code
 
 ```bash
-git clone https://github.com/EnergyMatrix-Eve/hobbie-time-tracker.git
-cd hobbie-time-tracker
+git clone https://github.com/eggkiller1101/Hobbie.git
+cd Hobbie
 ```
 
 ### 3. Install dependencies
@@ -343,4 +343,6 @@ Data does **not** move between SQLite and Supabase automatically: each keeps its
 - [ ] Encouraging messages from Tracky during long sessions
 - [ ] More hobby animations
 
-**Out of scope:** payments, deployment.
+- [ ] Deploy to Vercel with Supabase for persistent storage
+
+**Out of scope:** payments.
