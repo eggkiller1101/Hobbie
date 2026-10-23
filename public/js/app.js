@@ -55,6 +55,9 @@ const hobbyAddButton  = $('#hobby-form button');
 const stage           = $('.stage');
 const hobbyEmoji      = $('.hobby-emoji');
 const stageCaption    = $('#stage-caption');
+const timerPanel      = $('#timer-panel');
+const modeDialog      = $('#timer-mode-dialog');
+const modeButtons     = [...document.querySelectorAll('[data-timer-mode]')];
 const timerLabel      = $('#timer-label');
 const timerDisplay    = $('#timer-display');
 const encouragement   = $('#encouragement');
@@ -73,6 +76,28 @@ const btnStop         = $('#btn-stop');
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 const APP_TITLE = document.title;
+const TIMER_MODE_KEY = 'hobbie.timerMode';
+let savedTimerMode;
+try { savedTimerMode = localStorage.getItem(TIMER_MODE_KEY); } catch {}
+let timerMode = savedTimerMode === 'hidden' ? 'hidden' : 'visible';
+
+function setTimerMode(mode, save = true) {
+  if (mode !== 'visible' && mode !== 'hidden') return;
+  timerMode = mode;
+  if (save) { try { localStorage.setItem(TIMER_MODE_KEY, mode); } catch {} }
+  timerPanel.hidden = mode === 'hidden';
+  for (const button of modeButtons) button.setAttribute('aria-pressed', String(button.dataset.timerMode === mode));
+  renderTimer();
+}
+
+for (const button of modeButtons) button.addEventListener('click', () => setTimerMode(button.dataset.timerMode));
+for (const button of document.querySelectorAll('[data-choose-timer-mode]')) {
+  button.addEventListener('click', () => {
+    setTimerMode(button.dataset.chooseTimerMode);
+    modeDialog.close();
+  });
+}
+modeDialog.addEventListener('cancel', (event) => event.preventDefault());
 
 // Emoji shown on the island for each hobby, by lower-case name (others get a star)
 const HOBBY_EMOJI = {
@@ -520,7 +545,7 @@ function elapsedSeconds() {
 let shownTime = '';
 function renderTimer() {
   const text = formatDuration(elapsedSeconds());
-  document.title = timer.status === 'idle' ? APP_TITLE : `${text} · ${timer.hobby.name}`;
+  document.title = timer.status === 'idle' ? APP_TITLE : timerMode === 'hidden' ? `${timer.hobby.name} · ${APP_TITLE}` : `${text} · ${timer.hobby.name}`;
 
   if (text === shownTime) return; // only rebuild the digits when the second changes
   shownTime = text;
@@ -696,10 +721,11 @@ async function loadTotals() {
 
 // ---------- Start-up ----------
 const oceanControls = setupOceanControls();
-renderTimer();
+setTimerMode(timerMode, false);
+if (savedTimerMode !== 'visible' && savedTimerMode !== 'hidden') modeDialog.showModal();
 
 const welcome = await prepareWelcome();
-if (welcome.focusOn === nameInput) nameInput.focus(); // first visit: ready to type straight away
+if (welcome.focusOn === nameInput && !modeDialog.open) nameInput.focus(); // first visit: ready to type straight away
 
 // Let the dialogue box pop up before Tracky starts talking
 // (skip the intro if the player already picked or typed a name in the meantime).

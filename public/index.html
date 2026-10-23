@@ -174,8 +174,13 @@
           <p id="stage-caption" class="stage-caption">Pick a hobby to begin</p>
         </div>
 
+        <div class="timer-mode" role="group" aria-label="Timer display mode">
+          <button class="timer-mode-option" type="button" data-timer-mode="visible" aria-pressed="false">Show timer</button>
+          <button class="timer-mode-option" type="button" data-timer-mode="hidden" aria-pressed="false">Focus mode</button>
+        </div>
+
         <!-- Timer display -->
-        <div class="timer">
+        <div id="timer-panel" class="timer">
           <span id="timer-label" class="timer-label">Time spent</span>
           <div id="timer-display" class="timer-display" role="timer">00:00:00</div>
         </div>
@@ -244,6 +249,20 @@
       <button id="btn-go" class="btn btn-start" type="button">Let's go!</button>
     </div>
   </div>
+
+  <dialog id="timer-mode-dialog" class="timer-mode-dialog" aria-labelledby="timer-mode-title" aria-describedby="timer-mode-description">
+    <span class="dialogue-tag">Your pace</span>
+    <h2 id="timer-mode-title">How would you like to begin?</h2>
+    <p id="timer-mode-description">You can change this whenever you like.</p>
+    <div class="timer-mode-choices">
+      <button type="button" data-choose-timer-mode="visible">
+        <strong>Show timer</strong><span>See the time as you go.</span>
+      </button>
+      <button type="button" data-choose-timer-mode="hidden">
+        <strong>Focus mode</strong><span>Enjoy the moment. See the time when you stop.</span>
+      </button>
+    </div>
+  </dialog>
 
   <!-- ================= FINISH CELEBRATION (shown when Stop is pressed) ================= -->
   <dialog id="finish-dialog" class="finish-dialog" aria-labelledby="finish-title">
