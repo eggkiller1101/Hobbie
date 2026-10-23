@@ -16,6 +16,9 @@ const PUBLIC_DIR = path.join(import.meta.dirname, 'public');
 const app = express();
 
 // --- Middleware ----------------------------------------------------------
+// Vercel serves public/index.html via its CDN, while / can reach Express.
+app.get('/', (req, res) => res.redirect(302, '/index.html'));
+
 app.use(express.json());              // parse JSON request bodies into req.body
 app.use(express.static(PUBLIC_DIR));  // serve index.html, css/, js/
 
