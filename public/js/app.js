@@ -1,3 +1,5 @@
+import { setupOceanControls } from './ocean.js';
+
 // =============================================================
 // Hobbies Time Tracker — front-end logic
 //
@@ -431,6 +433,7 @@ function applyWeather(weather) {
 // ---------- Tracker screen ----------
 
 btnSwitch.addEventListener('click', async () => {
+  await oceanControls.stop();
   btnSwitch.disabled = true; // ignore double-clicks while the wipe runs
   player.id = null;
   player.name = '';
@@ -692,6 +695,7 @@ async function loadTotals() {
 }
 
 // ---------- Start-up ----------
+const oceanControls = setupOceanControls();
 renderTimer();
 
 const welcome = await prepareWelcome();

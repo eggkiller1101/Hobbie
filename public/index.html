@@ -127,6 +127,14 @@
         <p id="weather-now" class="weather-now" hidden></p>
       </div>
       <div class="topbar-right">
+        <div class="ocean-control" role="group" aria-label="Ocean sounds">
+          <button id="ocean-toggle" class="ocean-toggle" type="button" aria-pressed="false">
+            <span aria-hidden="true">🌊</span> Ocean <span class="ocean-state">Off</span>
+          </button>
+          <label class="sr-only" for="ocean-volume">Ocean volume</label>
+          <input id="ocean-volume" class="ocean-volume" type="range" min="0" max="100" value="35" aria-valuetext="35%">
+          <span id="ocean-status" class="sr-only" role="status"></span>
+        </div>
         <button id="btn-switch" class="btn btn-small" type="button">Switch player</button>
       </div>
     </header>

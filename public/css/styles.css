@@ -1358,3 +1358,39 @@ body[data-weather="storm"] .flash {
   .cloud-5 { translate: 78vw 0; }
   .stage-cloud { left: 15%; }
 }
+
+
+/* Ocean ambience sits alongside the player controls, independent of the timer. */
+.topbar-right { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.ocean-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 2px solid var(--cream-line);
+  border-radius: 24px;
+  background: var(--cream);
+  box-shadow: 0 3px 0 var(--cream-shadow);
+}
+.ocean-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 0;
+  border: 0;
+  background: transparent;
+  color: var(--brown);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+.ocean-state { min-width: 28px; font-size: 0.8rem; color: var(--brown-soft); }
+.ocean-toggle[aria-pressed="true"] .ocean-state { color: #25723b; }
+.ocean-volume { width: 80px; min-height: 32px; margin: 0; accent-color: var(--green); cursor: pointer; }
+.ocean-toggle:focus-visible, .ocean-volume:focus-visible { outline: 3px solid var(--brown); outline-offset: 4px; border-radius: 6px; }
+.ocean-toggle:disabled { cursor: wait; opacity: 0.65; }
+@media (max-width: 600px) {
+  .topbar-right { width: 100%; justify-content: space-between; gap: 8px; }
+  .ocean-control { padding: 6px 10px; gap: 7px; }
+  .ocean-volume { width: 65px; }
+}
