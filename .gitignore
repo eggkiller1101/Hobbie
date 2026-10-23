@@ -1,0 +1,15 @@
+# Dependencies (re-created by `npm install`)
+node_modules/
+
+# SQLite database files (re-created automatically when the server starts)
+data/*.db
+data/*.db-wal
+data/*.db-shm
+
+# Local environment / OS / editor noise
+.env
+.DS_Store
+Thumbs.db
+npm-debug.log*
+.vscode/
+.idea/

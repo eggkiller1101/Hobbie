@@ -1,0 +1,20 @@
+{
+  "name": "hobbie-time-tracker",
+  "version": "0.1.0",
+  "description": "Track the time people spend on their hobbies",
+  "private": true,
+  "type": "module",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "node --watch server/server.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.117.3",
+    "better-sqlite3": "^13.0.3",
+    "express": "^5.3.0"
+  }
+}

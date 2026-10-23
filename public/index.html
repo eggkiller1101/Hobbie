@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hobbies Time Tracker</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍃</text></svg>">
+
+  <!-- Rounded, friendly fonts (falls back to system fonts when offline) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap">
+
+  <link rel="stylesheet" href="css/styles.css">
+  <!-- type="module" scripts run after the HTML is parsed, so the DOM is ready -->
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+
+  <!-- Reusable SVG icons: drawn once here, used below with <use href="#icon-…"> -->
+  <svg class="icon-sprite" aria-hidden="true">
+    <symbol id="icon-leaf" viewBox="0 0 64 64">
+      <path d="M14 52C9 30 26 9 57 7c-1 31-19 49-43 45Z" fill="currentColor"/>
+      <path d="M14 52 7 59" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+      <path d="M15 50C25 36 37 24 50 15" stroke="#fff" stroke-width="3.5" stroke-linecap="round" fill="none" opacity="0.75"/>
+    </symbol>
+    <symbol id="icon-play" viewBox="0 0 24 24">
+      <path d="M7 4.6v14.8a1.2 1.2 0 0 0 1.8 1l12-7.4a1.2 1.2 0 0 0 0-2l-12-7.4A1.2 1.2 0 0 0 7 4.6Z" fill="currentColor"/>
+    </symbol>
+    <symbol id="icon-pause" viewBox="0 0 24 24">
+      <rect x="5" y="4" width="5" height="16" rx="1.6" fill="currentColor"/>
+      <rect x="14" y="4" width="5" height="16" rx="1.6" fill="currentColor"/>
+    </symbol>
+    <symbol id="icon-stop" viewBox="0 0 24 24">
+      <rect x="5" y="5" width="14" height="14" rx="3" fill="currentColor"/>
+    </symbol>
+    <!-- Tracky the quokka (there's no quokka emoji, so it's drawn here) -->
+    <symbol id="icon-quokka" viewBox="0 0 100 100">
+      <!-- small rounded ears, set high (drawn first so the head overlaps them) -->
+      <ellipse cx="31" cy="22" rx="10" ry="12.5" transform="rotate(-18 31 22)" fill="#a47c58" stroke="#5c3d22" stroke-width="2.5"/>
+      <ellipse cx="69" cy="22" rx="10" ry="12.5" transform="rotate(18 69 22)" fill="#a47c58" stroke="#5c3d22" stroke-width="2.5"/>
+      <ellipse cx="31.5" cy="23.5" rx="5" ry="7" transform="rotate(-18 31.5 23.5)" fill="#e2b48e"/>
+      <ellipse cx="68.5" cy="23.5" rx="5" ry="7" transform="rotate(18 68.5 23.5)" fill="#e2b48e"/>
+      <!-- egg-shaped head: narrow forehead, puffy cheeks -->
+      <path d="M50 19c16 0 27 11 29 26 7 5 10 12 10 20 0 15-17 25-39 25S11 80 11 65c0-8 3-15 10-20 2-15 13-26 29-26Z" fill="#a47c58" stroke="#5c3d22" stroke-width="2.5"/>
+      <!-- lighter cheeks/snout area -->
+      <path d="M26 63c0-7 9-11 24-11s24 4 24 11c0 10-10 18-24 18S26 73 26 63Z" fill="#e8d2b2"/>
+      <!-- rosy cheeks -->
+      <ellipse cx="24" cy="62" rx="6" ry="3.6" fill="#f08f7f" opacity="0.6"/>
+      <ellipse cx="76" cy="62" rx="6" ry="3.6" fill="#f08f7f" opacity="0.6"/>
+      <!-- beady eyes with a sparkle -->
+      <circle cx="38" cy="47" r="4.4" fill="#2e1f14"/>
+      <circle cx="62" cy="47" r="4.4" fill="#2e1f14"/>
+      <circle cx="36.6" cy="45.5" r="1.5" fill="#fff"/>
+      <circle cx="60.6" cy="45.5" r="1.5" fill="#fff"/>
+      <!-- rounded nose -->
+      <path d="M44.5 57c0-2.2 2.5-3.2 5.5-3.2s5.5 1 5.5 3.2-2.6 4.4-5.5 4.4-5.5-2.2-5.5-4.4Z" fill="#2e1f14"/>
+      <!-- the famous quokka smile: corners curl up into the cheeks -->
+      <path d="M50 61.2v4.3M38 63.5c1.5 5.5 9 8 12 2 3 6 10.5 3.5 12-2" fill="none" stroke="#2e1f14" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M36.6 62.2l1.6 1.6M63.4 62.2l-1.6 1.6" stroke="#2e1f14" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+  </svg>
+
+  <!-- Sky scene behind both screens. app.js sets data-weather / data-daytime
+       on <body>, and the CSS shows the matching pieces (sun or moon, rain, snow…). -->
+  <div class="scenery" aria-hidden="true">
+    <div class="stars"></div>
+    <div class="sun"></div>
+    <div class="moon"></div>
+    <div class="cloud cloud-1"></div>
+    <div class="cloud cloud-2"></div>
+    <div class="cloud cloud-3"></div>
+    <div class="cloud cloud-4"></div>
+    <div class="cloud cloud-5"></div>
+    <div class="fog"></div>
+    <div class="hills"></div>
+    <div class="precip"></div>
+    <div class="flash"></div>
+  </div>
+
+  <!-- ================= SCREEN 1: WELCOME (enter your name) ================= -->
+  <main id="screen-welcome" class="screen screen-welcome">
+    <div class="logo">
+      <svg class="logo-leaf" aria-hidden="true"><use href="#icon-leaf"/></svg>
+      <h1 class="logo-title">
+        Hobbies
+        <span class="logo-ribbon">Time Tracker</span>
+      </h1>
+    </div>
+
+    <section class="dialogue" aria-labelledby="guide-name">
+      <span class="dialogue-tag" id="guide-name">Tracky</span>
+      <span class="guide-avatar" aria-hidden="true"><svg class="quokka"><use href="#icon-quokka"/></svg></span>
+
+      <p class="dialogue-text">
+        <!-- Screen readers get the whole line at once; the typed copy is visual only -->
+        <span id="welcome-line-sr" class="sr-only" aria-live="polite"></span>
+        <span id="welcome-line" aria-hidden="true"></span>
+      </p>
+
+      <!-- Returning players: pick a saved name -->
+      <div id="player-picker" class="player-picker" hidden>
+        <ul id="player-list" class="player-list" aria-label="Saved players"></ul>
+        <button id="btn-new-player" class="btn btn-small" type="button">+ I'm new here</button>
+      </div>
+
+      <!-- First-time players: type a name -->
+      <form id="name-form" class="name-form" novalidate hidden>
+        <label for="player-name" class="sr-only">Your name</label>
+        <input id="player-name" type="text" maxlength="20" placeholder="Type your name…" autocomplete="off">
+        <button type="submit" class="btn btn-teal">That's me!</button>
+        <button id="btn-back-to-list" class="btn-link" type="button" hidden>← Back to the list</button>
+      </form>
+
+      <span class="dialogue-next" aria-hidden="true"></span>
+    </section>
+  </main>
+
+  <!-- ================= SCREEN 2: TRACKER ================= -->
+  <div id="screen-tracker" class="screen screen-tracker" hidden>
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="brand">
+          <svg class="brand-leaf" aria-hidden="true"><use href="#icon-leaf"/></svg>
+          Hobbies Time Tracker
+        </div>
+        <p id="weather-now" class="weather-now" hidden></p>
+      </div>
+      <div class="topbar-right">
+        <button id="btn-switch" class="btn btn-small" type="button">Switch player</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <h2 id="greeting" class="greeting" tabindex="-1">
+        Hi, <span id="player-greeting">friend</span>! What are we enjoying today?
+      </h2>
+
+      <!-- Tracker card -->
+      <section class="card" aria-labelledby="tracker-heading">
+        <h2 id="tracker-heading" class="card-tag">Track a Hobby</h2>
+
+        <div class="hobby-picker">
+          <div class="field">
+            <label for="hobby-select">Choose a hobby</label>
+            <!-- Filled from GET /api/hobbies; each option's value is the hobby's id -->
+            <select id="hobby-select">
+              <option value="">— Select a hobby —</option>
+            </select>
+          </div>
+          <form id="hobby-form" class="field inline-form">
+            <label for="hobby-name">…or add a new one</label>
+            <div class="inline-row">
+              <input id="hobby-name" type="text" maxlength="40" placeholder="e.g. Fishing" autocomplete="off">
+              <button type="submit" class="btn btn-teal">Add</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Hobby animation: a tiny island scene -->
+        <div class="stage" aria-live="polite">
+          <div class="stage-cloud" aria-hidden="true"></div>
+          <div class="island" aria-hidden="true">
+            <span class="hobby-emoji">🌱</span>
+          </div>
+          <p id="stage-caption" class="stage-caption">Pick a hobby to begin</p>
+        </div>
+
+        <!-- Timer display -->
+        <div class="timer">
+          <span id="timer-label" class="timer-label">Time spent</span>
+          <div id="timer-display" class="timer-display" role="timer">00:00:00</div>
+        </div>
+
+        <div class="controls">
+          <button id="btn-start" class="btn btn-start" type="button">
+            <svg class="btn-icon" aria-hidden="true"><use href="#icon-play"/></svg><span class="btn-label">Start</span>
+          </button>
+          <button id="btn-pause" class="btn btn-pause" type="button" disabled>
+            <svg class="btn-icon" aria-hidden="true"><use href="#icon-pause"/></svg>Pause
+          </button>
+          <button id="btn-stop" class="btn btn-stop" type="button" disabled>
+            <svg class="btn-icon" aria-hidden="true"><use href="#icon-stop"/></svg>Stop
+          </button>
+        </div>
+
+        <!-- Tracky's encouragement bubble -->
+        <div class="speech">
+          <span class="speech-avatar" aria-hidden="true"><svg class="quokka"><use href="#icon-quokka"/></svg></span>
+          <p id="encouragement" class="speech-text" aria-live="polite">Pick a hobby and press Start. I'll cheer you on!</p>
+        </div>
+      </section>
+
+      <!-- Accumulated time card -->
+      <section class="card" aria-labelledby="totals-heading">
+        <h2 id="totals-heading" class="card-tag card-tag-green">Hobby Log</h2>
+        <div class="table-scroll">
+          <table class="log-table">
+            <thead>
+              <tr><th scope="col">Player</th><th scope="col">Hobby</th><th scope="col">Sessions</th><th scope="col">Total time</th></tr>
+            </thead>
+            <tbody id="totals-body">
+              <tr><td colspan="4" class="muted">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <p>Hobbies Time Tracker · v0.4</p>
+    </footer>
+  </div>
+
+  <!-- Full-screen circle wipe used when switching screens.
+       When entering the tracker it doubles as the loading page that shows today's weather.
+       data-mode: "plain" (just the leaf) | "loading" (checking…) | "weather" (the weather card) -->
+  <div id="transition" class="transition" data-mode="plain">
+    <svg class="transition-leaf" aria-hidden="true"><use href="#icon-leaf"/></svg>
+
+    <p id="weather-announce" class="sr-only" aria-live="polite"></p>
+
+    <div class="loading" aria-hidden="true">
+      <p class="loading-title">Checking today's weather…</p>
+      <p id="loading-hint" class="loading-hint" hidden></p>
+    </div>
+
+    <div class="weather-card">
+      <span class="dialogue-tag">Today's weather</span>
+      <span id="weather-icon" class="weather-icon" aria-hidden="true">☀️</span>
+      <p id="weather-label" class="weather-label">Sunny</p>
+      <p id="weather-temp" class="weather-temp">20°C</p>
+      <p id="weather-range" class="weather-range">High 24° · Low 15°</p>
+      <p id="weather-place" class="weather-place">Your location</p>
+      <p id="weather-line" class="weather-line">What a sunny day!</p>
+      <button id="btn-go" class="btn btn-start" type="button">Let's go!</button>
+    </div>
+  </div>
+
+  <!-- ================= FINISH CELEBRATION (shown when Stop is pressed) ================= -->
+  <dialog id="finish-dialog" class="finish-dialog" aria-labelledby="finish-title">
+    <div class="confetti" aria-hidden="true">
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+    </div>
+    <span class="dialogue-tag">Tracky</span>
+    <h2 id="finish-title">Session complete!</h2>
+    <p>Great job, <span id="finish-name">friend</span>! You spent</p>
+    <p class="finish-time" id="finish-time">00:00:00</p>
+    <p>on <strong id="finish-hobby">your hobby</strong>.</p>
+    <p id="finish-total" class="finish-total"></p>
+    <form method="dialog">
+      <button class="btn btn-start">Yay!</button>
+    </form>
+  </dialog>
+
+</body>
+</html>
