@@ -747,7 +747,6 @@ select {
 .timer-mode-dialog::backdrop { background: rgb(40 110 150 / 0.5); backdrop-filter: blur(3px); }
 .timer-mode-dialog h2 { margin: 0 0 8px; font-family: var(--font-display); font-size: 1.8rem; }
 .timer-mode-dialog p { margin: 0 0 22px; }
-.timer-mode-dialog .dialogue-tag { left: 50%; translate: -50% 0; }
 .timer-mode-choices { display: grid; gap: 12px; }
 .timer-mode-choices button {
   display: grid;
