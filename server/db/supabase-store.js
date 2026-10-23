@@ -1,99 +1,66 @@
-// Supabase (hosted PostgreSQL), reached over HTTPS with the official client.
-// Used when SUPABASE_URL and SUPABASE_SECRET_KEY are set in .env.
-//
-// The server uses the SECRET key, which bypasses Row Level Security. That's
-// safe because it never leaves the server: the browser only talks to our API.
-
+// Every query is scoped by the server-derived browser credential hash.
 import { createClient } from '@supabase/supabase-js';
 import { HttpError } from '../validation.js';
-
 const CATALOGUE_COLUMNS = 'id, name, created_at';
 const ENTRY_COLUMNS = 'id, entrant_id, hobby_id, started_at, ended_at, duration_seconds, created_at';
 
 export function createSupabaseStore({ url, secretKey }) {
   rejectPublicKey(secretKey);
-
   const supabase = createClient(url, secretKey, {
-    // We're a server, not a logged-in user: no session to store or refresh.
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
   });
-
-  // supabase-js returns { data, error, status } instead of throwing. This turns errors into exceptions.
   async function run(query) {
     const { data, error, status } = await query;
     if (error) throw explain(error, status, url);
     return data;
   }
-
-  // Players and hobbies are both "id + unique name" tables, so they share this code.
-  function catalogue(table) {
-    const list = () => run(supabase.from(table).select(CATALOGUE_COLUMNS).order('name'));
-
-    // These lists are small, so names are compared in JavaScript. (PostgREST's
-    // "ilike" filter treats %, _ and * as wildcards, so "100%" could match other names.)
-    const find = async (name) => (await list()).find((row) => row.name.toLowerCase() === name.toLowerCase());
-
+  function catalogue(table, shared = false) {
+    // key comes only from a SHA-256 hash, never from a request parameter.
+    const scoped = (query, key) => shared
+      ? query.or(`browser_key.eq.${key},browser_key.is.null`)
+      : query.eq('browser_key', key);
+    const list = (key) => run(scoped(supabase.from(table).select(CATALOGUE_COLUMNS), key).order('name'));
     return {
       list,
-      async findOrCreate(name) {
-        const existing = await find(name);
+      async findOrCreate(name, key) {
+        const find = async () => (await list(key)).find((row) => row.name.toLowerCase() === name.toLowerCase());
+        const existing = await find();
         if (existing) return { row: existing, created: false };
-
-        const { data, error, status } = await supabase.from(table).insert({ name }).select(CATALOGUE_COLUMNS).single();
+        const { data, error, status } = await supabase.from(table)
+          .insert({ name, browser_key: key }).select(CATALOGUE_COLUMNS).single();
         if (!error) return { row: data, created: true };
-
-        // 23505 = unique violation: someone added the same name a moment ago.
         if (error.code === '23505') {
-          const row = await find(name);
+          const row = await find();
           if (row) return { row, created: false };
         }
         throw explain(error, status, url);
       },
     };
   }
-
-  const entrants = catalogue('entrants');
-  const hobbies = catalogue('hobbies');
-
+  const entrants = catalogue('browser_entrants');
+  const hobbies = catalogue('browser_hobbies', true);
   return {
-    name: 'Supabase',
-    location: url,
-    listEntrants: entrants.list,
-    findOrCreateEntrant: entrants.findOrCreate,
-    listHobbies: hobbies.list,
-    findOrCreateHobby: hobbies.findOrCreate,
-
-    createTimeEntry: ({ entrantId, hobbyId, startedAt, endedAt, durationSeconds }) => run(
-      supabase
-        .from('time_entries')
-        .insert({
-          entrant_id: entrantId,
-          hobby_id: hobbyId,
-          started_at: startedAt,
-          ended_at: endedAt,
-          duration_seconds: durationSeconds,
-        })
-        .select(ENTRY_COLUMNS)
-        .single(),
-    ),
-
-    hobbyTotals: () => run(
-      supabase
-        .from('hobby_totals')
-        .select('*')
-        .order('total_seconds', { ascending: false })
-        .order('entrant')
-        .order('hobby'),
-    ),
-
-    // Read at most one row from each table and the view, so a missing migration
-    // or a wrong key shows up at /api/health. (Not a "head" request: those have
-    // no body, and supabase-js treats an empty 404 as success, hiding a missing table.)
+    name: 'Supabase', location: url,
+    listEntrants: entrants.list, findOrCreateEntrant: entrants.findOrCreate,
+    listHobbies: hobbies.list, findOrCreateHobby: hobbies.findOrCreate,
+    async createTimeEntry({ browserKey, entrantId, hobbyId, startedAt, endedAt, durationSeconds }) {
+      const [entrants, hobbies] = await Promise.all([
+        run(supabase.from('browser_entrants').select('id').eq('id', entrantId).eq('browser_key', browserKey)),
+        run(supabase.from('browser_hobbies').select('id').eq('id', hobbyId)
+          .or(`browser_key.eq.${browserKey},browser_key.is.null`)),
+      ]);
+      if (!entrants.length || !hobbies.length) throw new HttpError(404, 'Player or hobby not found in this browser.');
+      return run(supabase.from('browser_time_entries').insert({
+        browser_key: browserKey, entrant_id: entrantId, hobby_id: hobbyId,
+        started_at: startedAt, ended_at: endedAt, duration_seconds: durationSeconds,
+      }).select(ENTRY_COLUMNS).single());
+    },
+    hobbyTotals: (key) => run(supabase.from('browser_hobby_totals')
+      .select('entrant_id, entrant, hobby_id, hobby, sessions, total_seconds')
+      .eq('browser_key', key).order('total_seconds', { ascending: false }).order('entrant').order('hobby')),
     async health() {
-      const tables = ['entrants', 'hobbies', 'time_entries', 'hobby_totals'];
-      for (const table of tables) {
-        await run(supabase.from(table).select('*').limit(1));
-      }
+      const tables = ['browser_entrants', 'browser_hobbies', 'browser_time_entries', 'browser_hobby_totals'];
+      for (const table of tables) await run(supabase.from(table).select('browser_key').limit(1));
       return { tables };
     },
   };

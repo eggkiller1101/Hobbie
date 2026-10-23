@@ -100,12 +100,14 @@
 
       <!-- Returning players: pick a saved name -->
       <div id="player-picker" class="player-picker" hidden>
+        <p class="muted">Your profiles and records stay in this browser. Clearing cookies or changing browsers starts fresh.</p>
         <ul id="player-list" class="player-list" aria-label="Saved players"></ul>
         <button id="btn-new-player" class="btn btn-small" type="button">+ I'm new here</button>
       </div>
 
       <!-- First-time players: type a name -->
       <form id="name-form" class="name-form" novalidate hidden>
+        <p class="muted">No login needed. Records belong to this browser; keep its cookies to return to them.</p>
         <label for="player-name" class="sr-only">Your name</label>
         <input id="player-name" type="text" maxlength="20" placeholder="Type your name…" autocomplete="off">
         <button type="submit" class="btn btn-teal">That's me!</button>

@@ -5,6 +5,7 @@
 import './server/env.js'; // must be first: loads .env before the database is chosen
 import path from 'node:path';
 import express from 'express';
+import { browserIdentity } from './server/browser-identity.js';
 import store from './server/db/index.js';
 import entrantsRouter from './server/routes/entrants.js';
 import hobbiesRouter from './server/routes/hobbies.js';
@@ -27,6 +28,7 @@ app.use(express.static(PUBLIC_DIR));  // serve index.html, css/, js/
 // Health check: proves the server is up AND the database is reachable,
 // and says which database is in use. Open it in the browser to troubleshoot.
 app.get('/api/health', async (req, res) => {
+  res.set('Cache-Control', 'no-store');
   try {
     const { tables } = await store.health();
     res.json({ status: 'ok', database: store.name, tables });
@@ -35,6 +37,7 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
+app.use('/api', browserIdentity);
 app.use('/api/entrants', entrantsRouter);
 app.use(['/api/hobbies', '/api/hobbie'], hobbiesRouter); // /api/hobbie = the original spec's name
 app.use('/api/time', timeRouter);

@@ -1,5 +1,5 @@
 // Routes for /api/hobbies (also reachable as /api/hobbie, the name in the original spec)
-//   GET  /api/hobbies  → list all hobbies
+//   GET  /api/hobbies  → list starter hobbies and this browser’s hobbies
 //   POST /api/hobbies  → add a hobby, or return the existing one   body: { "name": "Fishing" }
 
 import { Router } from 'express';
@@ -9,7 +9,7 @@ import { cleanName } from '../validation.js';
 const router = Router();
 
 router.get('/', async (req, res) => {
-  res.json(await store.listHobbies());
+  res.json(await store.listHobbies(req.browserKey));
 });
 
 router.post('/', async (req, res) => {
@@ -19,7 +19,7 @@ router.post('/', async (req, res) => {
     tooLongMessage: 'Hobby names can be at most 40 characters.',
   });
 
-  const { row, created } = await store.findOrCreateHobby(name);
+  const { row, created } = await store.findOrCreateHobby(name, req.browserKey);
   res.status(created ? 201 : 200).json(row); // 201 = newly created, 200 = already known
 });
 

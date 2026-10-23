@@ -105,7 +105,7 @@ const timer = {
 async function request(url, options = {}) {
   let response;
   try {
-    response = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...options });
+    response = await fetch(url, { ...options, credentials: 'same-origin', cache: 'no-store', headers: { 'Content-Type': 'application/json' } });
   } catch {
     throw new Error("Hmm, I can't reach the island server… Is it running?");
   }
@@ -661,7 +661,7 @@ window.addEventListener('beforeunload', (event) => {
 
 // ---------- Hobby Log (GET /api/time) ----------
 
-// Show everyone's totals, highlighting the current player's rows. Returns the rows.
+// Only this browser's totals are returned; highlight the selected profile.
 async function loadTotals() {
   const totals = await api('/api/time');
 

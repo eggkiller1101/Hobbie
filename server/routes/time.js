@@ -15,7 +15,7 @@ const router = Router();
 const CLOCK_TOLERANCE_MS = 5 * 60 * 1000;
 
 router.get('/', async (req, res) => {
-  res.json(await store.hobbyTotals());
+  res.json(await store.hobbyTotals(req.browserKey));
 });
 
 router.post('/', async (req, res) => {
@@ -45,6 +45,7 @@ router.post('/', async (req, res) => {
   }
 
   const entry = await store.createTimeEntry({
+    browserKey: req.browserKey,
     entrantId: entrant_id,
     hobbyId: hobby_id,
     startedAt: start.toISOString(),

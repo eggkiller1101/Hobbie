@@ -13,3 +13,8 @@ Thumbs.db
 npm-debug.log*
 .vscode/
 .idea/
+
+# Supabase CLI local state
+supabase/.temp/
+# Local API examples
+cookies.txt

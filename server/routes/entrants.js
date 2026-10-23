@@ -1,5 +1,5 @@
 // Routes for /api/entrants (the players)
-//   GET  /api/entrants  → list all saved players
+//   GET  /api/entrants  → list players belonging to this browser
 //   POST /api/entrants  → add a player, or return the existing one   body: { "name": "Alex" }
 
 import { Router } from 'express';
@@ -9,7 +9,7 @@ import { cleanName } from '../validation.js';
 const router = Router();
 
 router.get('/', async (req, res) => {
-  res.json(await store.listEntrants());
+  res.json(await store.listEntrants(req.browserKey));
 });
 
 router.post('/', async (req, res) => {
@@ -19,8 +19,8 @@ router.post('/', async (req, res) => {
     tooLongMessage: 'Names can be at most 20 characters.',
   });
 
-  // Names are unique ignoring case, so "alex" finds the existing "Alex".
-  const { row, created } = await store.findOrCreateEntrant(name);
+  // Names are unique within this browser, ignoring case.
+  const { row, created } = await store.findOrCreateEntrant(name, req.browserKey);
   res.status(created ? 201 : 200).json(row); // 201 = newly created, 200 = already known
 });
 
